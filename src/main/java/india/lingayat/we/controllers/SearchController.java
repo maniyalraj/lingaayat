@@ -143,6 +143,12 @@ public class SearchController {
 
     }
 
+    @GetMapping("/getUser/{id}")
+    public User getUser(@PathVariable Long id)
+    {
+        return userRepository.findById(id).orElse(null);
+    }
+
     public static boolean isNumeric(String strNum) {
         if (strNum == null) {
             return false;
