@@ -82,6 +82,13 @@ public class AuthController {
         User user = new User(signUpRequest.getFirstName(), signUpRequest.getLastName(), signUpRequest.getMiddleName(), signUpRequest.getUsername(),
                 signUpRequest.getEmail(), signUpRequest.getPassword(), signUpRequest.getContact());
 
+
+        UserPersonalDetails userPersonalDetails = new UserPersonalDetails();
+
+        userPersonalDetails.setGender(signUpRequest.getGender());
+
+        user.setUserPersonalDetails(userPersonalDetails);
+
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
         Role userRole = roleRepository.findByName(RoleName.ROLE_USER)

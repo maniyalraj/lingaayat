@@ -20,7 +20,6 @@ public class UserPersonalDetails {
 
     private Date dob;
 
-    @NotBlank
     private String placeOfBirth;
 
     @Enumerated(EnumType.STRING)

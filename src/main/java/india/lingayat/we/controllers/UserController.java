@@ -7,6 +7,7 @@ import india.lingayat.we.payload.UserSummary;
 import india.lingayat.we.repositories.*;
 import india.lingayat.we.models.*;
 import india.lingayat.we.repositories.*;
+import india.lingayat.we.utils.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -53,14 +56,96 @@ public class UserController {
 
     @GetMapping("/user/me")
     @PreAuthorize("hasRole('USER')")
-    public UserSummary getCurrentUser(@CurrentUser UserPrincipal currentUser) {
-        UserSummary userSummary = new UserSummary(currentUser.getId(), currentUser.getUsername(), currentUser.getFirstName(), currentUser.getLastName(), currentUser.getMiddleName(), currentUser.getContact(), currentUser.getEmail());
-        return userSummary;
+    public SafeUserDetails getCurrentUser(@CurrentUser UserPrincipal currentUser) {
+
+        User user = userRepository.getOne(currentUser.getId());
+
+        SafeUserDetails sud =  Utils.mapUserToSafeUsers(user, true);
+
+        return sud;
+
     }
 
     @GetMapping("/version")
     public String getCurrentVersion(@CurrentUser UserPrincipal currentUser) {
         return "v1";
+    }
+
+    @PostMapping("/user/save/favourite")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> saveFavourite(@CurrentUser UserPrincipal currentUser, @RequestBody Long userToAddId) {
+
+        User user = userRepository.findByEmail(currentUser.getEmail());
+
+        User userToAdd = userRepository.findById(userToAddId).orElse(null);
+
+        boolean canAddToFav =  user != null
+                && userToAdd!=null
+                && user.getUserPersonalDetails()!=null
+                && userToAdd.getUserPersonalDetails()!=null
+                && !user.getUserPersonalDetails().getGender()
+                .equals(
+                        userToAdd.getUserPersonalDetails().getGender()
+                );
+
+        if (canAddToFav) {
+
+            Set<User> favouriteList = user.getFavouritesList();
+
+            if (favouriteList == null) {
+                favouriteList = new HashSet<>();
+            }
+
+            favouriteList.add(userToAdd);
+
+            user.setFavouritesList(favouriteList);
+
+            userRepository.save(user);
+
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentContextPath().path("/user/save/favourite")
+                    .buildAndExpand(currentUser.getUsername()).toUri();
+
+            return ResponseEntity.created(location).body(new ApiResponse(true, "User added to Favourite list"));
+
+        } else {
+            return new ResponseEntity<>(new ApiResponse(false, "Cannot add to favourite"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
+    }
+
+    @PostMapping("/user/remove/favourite")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> removeFavourite(@CurrentUser UserPrincipal currentUser, @RequestBody Long userToRemoveId) {
+
+        User user = userRepository.findByEmail(currentUser.getEmail());
+
+        User userToRemove = userRepository.findById(userToRemoveId).orElse(null);
+
+        Set<User> currentFavList = user.getFavouritesList();
+
+        boolean canRemove =  user != null && userToRemove!=null && currentFavList.contains(userToRemove);
+
+        if (canRemove) {
+
+            currentFavList.remove(userToRemove);
+
+            user.setFavouritesList(currentFavList);
+
+            userRepository.save(user);
+
+            URI location = ServletUriComponentsBuilder
+                    .fromCurrentContextPath().path("/user/save/favourite")
+                    .buildAndExpand(currentUser.getUsername()).toUri();
+
+            return ResponseEntity.created(location).body(new ApiResponse(true, "User removed from Favourite list"));
+
+        } else {
+            return new ResponseEntity<>(new ApiResponse(false, "Cannot remove from favourite"), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+
     }
 
     @PostMapping("/user/save/basicDetails")

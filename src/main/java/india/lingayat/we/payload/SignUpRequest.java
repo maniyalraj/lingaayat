@@ -1,5 +1,7 @@
 package india.lingayat.we.payload;
 
+import india.lingayat.we.models.enums.Gender;
+
 import javax.validation.constraints.*;
 
 
@@ -34,6 +36,15 @@ public class SignUpRequest {
     @Size(min = 10, max = 13)
     private String contact;
 
+    private Gender gender;
+
+    public Gender getGender() {
+        return gender;
+    }
+
+    public void setGender(Gender gender) {
+        this.gender = gender;
+    }
 
     public String getFirstName() {
         return firstName;

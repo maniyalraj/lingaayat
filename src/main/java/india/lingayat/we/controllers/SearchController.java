@@ -6,12 +6,14 @@ import india.lingayat.we.models.UserPersonalDetails_;
 import india.lingayat.we.models.User_;
 import india.lingayat.we.models.enums.Gender;
 import india.lingayat.we.payload.FilterRequest;
+import india.lingayat.we.payload.SafeUserPage;
 import india.lingayat.we.payload.UserCount;
 import india.lingayat.we.payload.UserMinimumProjection;
 import india.lingayat.we.repositories.*;
 import india.lingayat.we.repositories.UserRepository;
 import india.lingayat.we.services.CacheEvictionService;
 import india.lingayat.we.specifications.UserSpecification;
+import india.lingayat.we.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -28,7 +30,10 @@ import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -57,13 +62,20 @@ public class SearchController {
 
     @PostMapping("/getAllUsers")
     @PreAuthorize("hasRole('USER')")
-    public Page<User> getAllUsers(Pageable pageable, @CurrentUser UserPrincipal currentUser, @RequestBody FilterRequest filterRequest) {
+    public SafeUserPage getAllUsers(Pageable pageable, @CurrentUser UserPrincipal currentUser, @RequestBody FilterRequest filterRequest) {
 
         Specification<User> specification = Specification.where(UserSpecification.alwaysTrue());
+
+        User cuser = userRepository.findById(currentUser.getId()).orElse(null);
 
         BooleanBuilder booleanBuilder = new BooleanBuilder();
 
         booleanBuilder.and(QUser.user.id.ne(currentUser.getId()));
+
+        if(cuser.getUserPersonalDetails() !=null)
+        {
+            booleanBuilder.and(QUser.user.userPersonalDetails.gender.ne(cuser.getUserPersonalDetails().getGender()));
+        }
 
         if (filterRequest.getMaxHeight() > 0) {
 
@@ -138,15 +150,50 @@ public class SearchController {
             }
         }
 
+        Page<User> userPage = userRepository.findAll(booleanBuilder.getValue(), pageable);
 
-        return userRepository.findAll(booleanBuilder.getValue(), pageable);
+        List<User> userList = userPage.toList();
+
+        Set<SafeUserDetails> safeUserDetailsList = new HashSet<>();
+
+        userList.stream().forEach(user -> safeUserDetailsList.add(Utils.mapUserToSafeUsers(user, false)));
+
+        SafeUserPage page = new SafeUserPage(userPage.getTotalElements(), safeUserDetailsList);
+
+        return page;
 
     }
 
     @GetMapping("/getUser/{id}")
-    public User getUser(@PathVariable Long id)
+    public SafeUserDetails getUser(@CurrentUser UserPrincipal currentUser, @PathVariable Long id)
     {
-        return userRepository.findById(id).orElse(null);
+
+        SafeUserDetails sud =  new SafeUserDetails();
+
+        User user = userRepository.findById(id).orElse(null);
+
+        User _user = userRepository.findById(currentUser.getId()).orElse(null);
+
+        boolean canView = user != null
+                && _user !=null
+                && user.getUserPersonalDetails() !=null
+                && _user.getUserPersonalDetails() !=null
+                && !user.getUserPersonalDetails().getGender()
+                .equals(
+                        _user.getUserPersonalDetails().getGender()
+                );
+
+        if(canView)
+        {
+            sud = Utils.mapUserToSafeUsers(user, false);
+        }
+        else
+        {
+            sud = null;
+        }
+
+
+        return sud;
     }
 
     public static boolean isNumeric(String strNum) {

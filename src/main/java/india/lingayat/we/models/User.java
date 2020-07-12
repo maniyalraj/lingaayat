@@ -10,6 +10,7 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -59,6 +60,13 @@ public class User {
     @NotBlank
     @Size(max = 15)
     private String contact;
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToMany()
+    @JoinTable(name = "user_favourites",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "favourite_id"))
+    private Set<User> favouritesList;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToMany()
@@ -239,5 +247,13 @@ public class User {
 
     public void setUserProfessionalDetails(UserProfessionalDetails userProfessionalDetails) {
         this.userProfessionalDetails = userProfessionalDetails;
+    }
+
+    public Set<User> getFavouritesList() {
+        return favouritesList;
+    }
+
+    public void setFavouritesList(Set<User> favouritesList) {
+        this.favouritesList = favouritesList;
     }
 }
