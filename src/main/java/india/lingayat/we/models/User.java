@@ -70,6 +70,13 @@ public class User {
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @ManyToMany()
+    @JoinTable(name = "user_unlock_status",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "unlock_user_id"))
+    private Set<User> unlockedList;
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @ManyToMany()
     @JoinTable(name = "user_roles",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -102,6 +109,8 @@ public class User {
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToOne(cascade = CascadeType.ALL)
     private UserProfessionalDetails userProfessionalDetails;
+
+    private int credits = 0;
 
     public User() {
 
@@ -255,5 +264,25 @@ public class User {
 
     public void setFavouritesList(Set<User> favouritesList) {
         this.favouritesList = favouritesList;
+    }
+
+    public Set<User> getUnlockedList() {
+        return unlockedList;
+    }
+
+    public void setUnlockedList(Set<User> unlockedList) {
+        this.unlockedList = unlockedList;
+    }
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
+    }
+
+    public void setUserFamilyDetails(Set<UserFamilyDetails> userFamilyDetails) {
+        this.userFamilyDetails = userFamilyDetails;
     }
 }

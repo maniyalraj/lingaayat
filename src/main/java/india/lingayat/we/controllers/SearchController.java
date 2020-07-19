@@ -156,7 +156,9 @@ public class SearchController {
 
         Set<SafeUserDetails> safeUserDetailsList = new HashSet<>();
 
-        userList.stream().forEach(user -> safeUserDetailsList.add(Utils.mapUserToSafeUsers(user, false)));
+        Set<User> unlockedUsers = cuser.getUnlockedList();
+
+        userList.stream().forEach(user ->safeUserDetailsList.add(Utils.mapUserToSafeUsers(currentUser, user, unlockedUsers.contains(user))));
 
         SafeUserPage page = new SafeUserPage(userPage.getTotalElements(), safeUserDetailsList);
 
@@ -174,6 +176,8 @@ public class SearchController {
 
         User _user = userRepository.findById(currentUser.getId()).orElse(null);
 
+        boolean isUnlocked = _user.getUnlockedList().contains(user);
+
         boolean canView = user != null
                 && _user !=null
                 && user.getUserPersonalDetails() !=null
@@ -185,7 +189,7 @@ public class SearchController {
 
         if(canView)
         {
-            sud = Utils.mapUserToSafeUsers(user, false);
+            sud = Utils.mapUserToSafeUsers(currentUser, user, isUnlocked);
         }
         else
         {

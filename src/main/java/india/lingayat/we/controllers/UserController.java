@@ -60,7 +60,7 @@ public class UserController {
 
         User user = userRepository.getOne(currentUser.getId());
 
-        SafeUserDetails sud =  Utils.mapUserToSafeUsers(user, true);
+        SafeUserDetails sud =  Utils.mapUserToSafeUsers(currentUser, user, false);
 
         return sud;
 
@@ -79,18 +79,18 @@ public class UserController {
 
         User userToAdd = userRepository.findById(userToAddId).orElse(null);
 
+        Set<User> favouriteList = user.getFavouritesList();
+
         boolean canAddToFav =  user != null
                 && userToAdd!=null
                 && user.getUserPersonalDetails()!=null
                 && userToAdd.getUserPersonalDetails()!=null
                 && !user.getUserPersonalDetails().getGender()
-                .equals(
-                        userToAdd.getUserPersonalDetails().getGender()
-                );
+                .equals(userToAdd.getUserPersonalDetails().getGender())
+                && favouriteList != null
+                && favouriteList.size()<=10;
 
         if (canAddToFav) {
-
-            Set<User> favouriteList = user.getFavouritesList();
 
             if (favouriteList == null) {
                 favouriteList = new HashSet<>();
@@ -147,6 +147,54 @@ public class UserController {
 
 
     }
+
+    @PostMapping("/user/unlock")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> unlockUser(@CurrentUser UserPrincipal currentUser, @RequestBody Long userToUnlock)
+    {
+
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/user/unlock")
+                .buildAndExpand(currentUser.getUsername()).toUri();
+
+        User user = userRepository.findById(userToUnlock).orElse(null);
+
+        User _currentUser = userRepository.findById(currentUser.getId()).orElse(null);
+
+        Set<User> unlockedUsers = _currentUser.getUnlockedList();
+
+        if(user != _currentUser && user != null)
+        {
+
+            if(!unlockedUsers.contains(user))
+            {
+                int availableCredits = _currentUser.getCredits();
+                if(availableCredits > 0)
+                {
+                    _currentUser.setCredits(availableCredits - 100);
+
+                    unlockedUsers.add(user);
+                    _currentUser.setUnlockedList(unlockedUsers);
+
+                    userRepository.save(_currentUser);
+
+                }else{
+                    return new ResponseEntity<>(new ApiResponse(false, "Insufficient Credits"), HttpStatus.INTERNAL_SERVER_ERROR);
+                }
+
+            }
+
+            return ResponseEntity.created(location).body(new ApiResponse(true, "User unlocked"));
+
+        }
+        else
+        {
+            return new ResponseEntity<>(new ApiResponse(false, "Cannot unlock"), HttpStatus.INTERNAL_SERVER_ERROR);
+
+        }
+
+    }
+
 
     @PostMapping("/user/save/basicDetails")
     @PreAuthorize("hasRole('USER')")

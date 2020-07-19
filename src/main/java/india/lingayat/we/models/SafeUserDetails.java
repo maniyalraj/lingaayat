@@ -15,30 +15,33 @@ public class SafeUserDetails {
     private UserEducationalDetails userEducationalDetails;
     private Set<UserFamilyDetails> userFamilyDetails;
     private Set<SafeUserDetails> userFavourites;
+    private Set<SafeUserDetails> unlockedUsers;
     private UserImages userImages;
     private UserMedicalDetails userMedicalDetails;
     private UserPersonalDetails userPersonalDetails;
     private UserProfessionalDetails userProfessionalDetails;
+    private int credits;
+    private boolean isUnlocked;
 
     public SafeUserDetails() {
     }
 
-    public SafeUserDetails(Long id, String firstName, String middleName, String lastName, String email, String contact, String currentCity, String permanentCity, UserEducationalDetails userEducationalDetails, Set<UserFamilyDetails> userFamilyDetails, UserImages userImages, UserMedicalDetails userMedicalDetails, UserPersonalDetails userPersonalDetails, UserProfessionalDetails userProfessionalDetails) {
-        this.id = id;
-        this.firstName = firstName;
-        this.middleName = middleName;
-        this.lastName = lastName;
-        this.email = email;
-        this.contact = contact;
-        this.currentCity = currentCity;
-        this.permanentCity = permanentCity;
-        this.userEducationalDetails = userEducationalDetails;
-        this.userFamilyDetails = userFamilyDetails;
-        this.userImages = userImages;
-        this.userMedicalDetails = userMedicalDetails;
-        this.userPersonalDetails = userPersonalDetails;
-        this.userProfessionalDetails = userProfessionalDetails;
-    }
+//    public SafeUserDetails(Long id, String firstName, String middleName, String lastName, String email, String contact, String currentCity, String permanentCity, UserEducationalDetails userEducationalDetails, Set<UserFamilyDetails> userFamilyDetails, UserImages userImages, UserMedicalDetails userMedicalDetails, UserPersonalDetails userPersonalDetails, UserProfessionalDetails userProfessionalDetails) {
+//        this.id = id;
+//        this.firstName = firstName;
+//        this.middleName = middleName;
+//        this.lastName = lastName;
+//        this.email = email;
+//        this.contact = contact;
+//        this.currentCity = currentCity;
+//        this.permanentCity = permanentCity;
+//        this.userEducationalDetails = userEducationalDetails;
+//        this.userFamilyDetails = userFamilyDetails;
+//        this.userImages = userImages;
+//        this.userMedicalDetails = userMedicalDetails;
+//        this.userPersonalDetails = userPersonalDetails;
+//        this.userProfessionalDetails = userProfessionalDetails;
+//    }
 
     public Long getId() {
         return id;
@@ -158,5 +161,30 @@ public class SafeUserDetails {
 
     public void setUserFavourites(Set<SafeUserDetails> userFavourites) {
         this.userFavourites = userFavourites;
+    }
+
+
+    public int getCredits() {
+        return credits;
+    }
+
+    public void setCredits(int credits) {
+        this.credits = credits;
+    }
+
+    public boolean isUnlocked() {
+        return isUnlocked;
+    }
+
+    public void setUnlocked(boolean unlocked) {
+        isUnlocked = unlocked;
+    }
+
+    public Set<SafeUserDetails> getUnlockedUsers() {
+        return unlockedUsers;
+    }
+
+    public void setUnlockedUsers(Set<SafeUserDetails> unlockedUsers) {
+        this.unlockedUsers = unlockedUsers;
     }
 }
