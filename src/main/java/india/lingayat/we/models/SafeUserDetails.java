@@ -15,6 +15,7 @@ public class SafeUserDetails {
     private UserEducationalDetails userEducationalDetails;
     private Set<UserFamilyDetails> userFamilyDetails;
     private Set<UserImages> userImageLibrary;
+    private int imageCount;
     private Set<SafeUserDetails> userFavourites;
     private Set<SafeUserDetails> unlockedUsers;
     private UserImages userImages;
@@ -195,5 +196,13 @@ public class SafeUserDetails {
 
     public void setUserImageLibrary(Set<UserImages> userImageLibrary) {
         this.userImageLibrary = userImageLibrary;
+    }
+
+    public int getImageCount() {
+        return imageCount;
+    }
+
+    public void setImageCount(int imageCount) {
+        this.imageCount = imageCount;
     }
 }

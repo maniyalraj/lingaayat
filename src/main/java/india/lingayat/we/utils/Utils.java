@@ -1,9 +1,6 @@
 package india.lingayat.we.utils;
 
-import india.lingayat.we.models.SafeUserDetails;
-import india.lingayat.we.models.User;
-import india.lingayat.we.models.UserAdditionalDetails;
-import india.lingayat.we.models.UserPrincipal;
+import india.lingayat.we.models.*;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import java.util.HashSet;
@@ -49,6 +46,9 @@ public class Utils {
             sud.setEmail(user.getEmail());
             sud.setContact(user.getContact());
             sud.setUserFamilyDetails(user.getUserFamilyDetails());
+            Set<UserImages> userImages = user.getUserImageLibrary();
+            sud.setUserImageLibrary(userImages);
+            sud.setImageCount(userImages.size());
 
             if (currentUser.getId() == user.getId() || isAdmin) {
                 Set<SafeUserDetails> sudSet = new HashSet<>();
@@ -64,15 +64,16 @@ public class Utils {
                 sud.setUnlockedUsers(unlockedSud);
                 sud.setCredits(user.getCredits());
 
-                sud.setUserImageLibrary(user.getUserImageLibrary());
+                sud.setUnlocked(true);
 
             }else if(!isUnlocked)
             {
-                sud.setLastName(user.getLastName().substring(0,1).concat("****"));
+                sud.setLastName(user.getLastName().substring(0,1).concat("****env"));
                 sud.setMiddleName(user.getMiddleName().substring(0,1).concat("****"));
                 sud.setEmail("*****");
                 sud.setContact("****");
                 sud.setUserFamilyDetails(new HashSet<>());
+                sud.setUserImageLibrary(null);
             }
 
             return sud;
