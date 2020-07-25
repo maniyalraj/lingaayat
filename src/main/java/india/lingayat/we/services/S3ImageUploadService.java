@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 
 @Service
 public class S3ImageUploadService {
@@ -30,12 +31,12 @@ public class S3ImageUploadService {
     private String bucketName;
 
 
-    public Map<String, String> uploadImage(MultipartFile multipartFile, User user)
+    public Map<String, String> uploadImage(MultipartFile multipartFile, User user, String imageFolder)
     {
         Regions clientRegion = Regions.AP_SOUTH_1;
         Map<String, String> uploadResult = new HashMap<>();
         uploadResult.put("url","");
-        String bucketKey = user.getId()+"/"+user.getLastName()+user.getMiddleName()+".jpeg";
+        String bucketKey = user.getId()+"/"+imageFolder+"/"+user.getLastName()+user.getMiddleName()+ UUID.randomUUID().toString() +".jpeg";
         File file = null;
 
         try{

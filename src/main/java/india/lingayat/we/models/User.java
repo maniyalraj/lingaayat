@@ -95,6 +95,10 @@ public class User {
     private Set<UserFamilyDetails> userFamilyDetails;
 
     @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<UserImages> userImageLibrary;
+
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     @OneToOne(cascade = CascadeType.ALL)
     private UserImages userImages;
 
@@ -284,5 +288,13 @@ public class User {
 
     public void setUserFamilyDetails(Set<UserFamilyDetails> userFamilyDetails) {
         this.userFamilyDetails = userFamilyDetails;
+    }
+
+    public Set<UserImages> getUserImageLibrary() {
+        return userImageLibrary;
+    }
+
+    public void setUserImageLibrary(Set<UserImages> userImageLibrary) {
+        this.userImageLibrary = userImageLibrary;
     }
 }

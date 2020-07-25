@@ -63,6 +63,9 @@ public class Utils {
 
                 sud.setUnlockedUsers(unlockedSud);
                 sud.setCredits(user.getCredits());
+
+                sud.setUserImageLibrary(user.getUserImageLibrary());
+
             }else if(!isUnlocked)
             {
                 sud.setLastName(user.getLastName().substring(0,1).concat("****"));

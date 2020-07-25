@@ -21,7 +21,9 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api")
@@ -50,7 +52,8 @@ public class ImageUploadController {
         User user = userRepository.findByEmail(currentUser.getEmail());
 
         //            uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
-        uploadResult = s3ImageUploadService.uploadImage(file, user);
+
+        uploadResult = s3ImageUploadService.uploadImage(file, user, "profile");
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/api/upload/image")
                 .buildAndExpand("image").toUri();
@@ -60,7 +63,7 @@ public class ImageUploadController {
         {
 
             responseMessage += uploadResult.get("url").toString();
-            UserImages userImages = new UserImages(uploadResult.get("url").toString(), "Profile", user);
+            UserImages userImages = new UserImages(uploadResult.get("url").toString(), "profile", user);
 
             userImages.setUser(user);
             user.setUserImages(userImages);
@@ -76,11 +79,63 @@ public class ImageUploadController {
     @GetMapping("/get/profileImage")
     @PreAuthorize("hasRole('USER')")
     public UserImages getProfileImage(@CurrentUser UserPrincipal currentUser){
-        User user = userRepository.findByEmail(currentUser.getEmail());
-
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
 
         return user.getUserImages();
     }
 
+    @PostMapping("/save/libraryImage")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> uploadLibraryImage(@CurrentUser UserPrincipal currentUser, @RequestParam("file") MultipartFile file)  {
+
+        Cloudinary cloudinary = clouditonaryImageService.getCloudinary();
+        Map uploadResult = null;
+        String responseMessage = "";
+
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
+
+        int countImages = user.getUserImageLibrary().size();
+
+        if(countImages > 4)
+        {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Cannot upload more than 4 images"));
+        }
+
+        uploadResult = s3ImageUploadService.uploadImage(file, user, "library");
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/api/upload/image")
+                .buildAndExpand("image").toUri();
+
+
+        if(uploadResult.get("url")!=null)
+        {
+
+            responseMessage += uploadResult.get("url").toString();
+            UserImages userImage = new UserImages(uploadResult.get("url").toString(), "library", user);
+
+            Set<UserImages> library =  user.getUserImageLibrary();
+
+            if(library == null)
+            {
+                library = new HashSet<UserImages>();
+
+            }
+            library.add(userImage);
+
+            user.setUserImageLibrary(library);
+            userRepository.save(user);
+
+        }
+
+        return ResponseEntity.created(location).body(new ApiResponse(true, responseMessage));
+    }
+
+    @GetMapping("/get/libraryImages")
+    @PreAuthorize("hasRole('USER')")
+    public Set<UserImages> getLibraryImages(@CurrentUser UserPrincipal currentUser){
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
+
+        return user.getUserImageLibrary();
+    }
 
 }

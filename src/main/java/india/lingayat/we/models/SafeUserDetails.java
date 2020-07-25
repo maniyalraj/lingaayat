@@ -14,6 +14,7 @@ public class SafeUserDetails {
     private String permanentCity;
     private UserEducationalDetails userEducationalDetails;
     private Set<UserFamilyDetails> userFamilyDetails;
+    private Set<UserImages> userImageLibrary;
     private Set<SafeUserDetails> userFavourites;
     private Set<SafeUserDetails> unlockedUsers;
     private UserImages userImages;
@@ -186,5 +187,13 @@ public class SafeUserDetails {
 
     public void setUnlockedUsers(Set<SafeUserDetails> unlockedUsers) {
         this.unlockedUsers = unlockedUsers;
+    }
+
+    public Set<UserImages> getUserImageLibrary() {
+        return userImageLibrary;
+    }
+
+    public void setUserImageLibrary(Set<UserImages> userImageLibrary) {
+        this.userImageLibrary = userImageLibrary;
     }
 }
