@@ -15,6 +15,7 @@ public class FilterRequest {
     private List<Qualification> qualification;
     private String firstName;
     private String lastName;
+    private String middleName;
     private List<JobType> jobType;
     private String cityNameOrPin;
 
@@ -48,6 +49,8 @@ public class FilterRequest {
     public String getFirstName() {
         return firstName;
     }
+
+    public String getMiddleName(){ return middleName;}
 
     public String getLastName() {
         return lastName;

@@ -2,38 +2,31 @@ package india.lingayat.we.controllers;
 
 import com.querydsl.core.BooleanBuilder;
 import india.lingayat.we.models.*;
-import india.lingayat.we.models.UserPersonalDetails_;
-import india.lingayat.we.models.User_;
 import india.lingayat.we.models.enums.Gender;
 import india.lingayat.we.payload.FilterRequest;
 import india.lingayat.we.payload.SafeUserPage;
 import india.lingayat.we.payload.UserCount;
-import india.lingayat.we.payload.UserMinimumProjection;
 import india.lingayat.we.repositories.*;
 import india.lingayat.we.repositories.UserRepository;
 import india.lingayat.we.services.CacheEvictionService;
 import india.lingayat.we.specifications.UserSpecification;
 import india.lingayat.we.utils.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.*;
 import java.sql.Date;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api")
@@ -186,6 +179,9 @@ public class SearchController {
                 .equals(
                         _user.getUserPersonalDetails().getGender()
                 );
+        if(currentUser.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"))){
+        canView = true;
+    }
 
         if(canView)
         {

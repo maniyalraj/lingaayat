@@ -10,6 +10,9 @@ public class AddCreditsPayload {
     @NotBlank
     private int creditsToAdd;
 
+    @NotBlank
+    private String reference;
+
     public Long getUserId() {
         return userId;
     }
@@ -24,5 +27,13 @@ public class AddCreditsPayload {
 
     public void setCreditsToAdd(int creditsToAdd) {
         this.creditsToAdd = creditsToAdd;
+    }
+
+    public String getReference() {
+        return reference;
+    }
+
+    public void setReference(String reference) {
+        this.reference = reference;
     }
 }

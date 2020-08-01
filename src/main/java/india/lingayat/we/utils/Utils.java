@@ -16,6 +16,8 @@ public class Utils {
 
         boolean isAdmin = currentUser.getAuthorities().contains(new SimpleGrantedAuthority("ROLE_ADMIN"));
 
+        sud.setAdmin(isAdmin);
+
         if(user == null)
         {
             return null;

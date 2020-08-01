@@ -24,26 +24,10 @@ public class SafeUserDetails {
     private UserProfessionalDetails userProfessionalDetails;
     private int credits;
     private boolean isUnlocked;
+    private boolean isAdmin;
 
     public SafeUserDetails() {
     }
-
-//    public SafeUserDetails(Long id, String firstName, String middleName, String lastName, String email, String contact, String currentCity, String permanentCity, UserEducationalDetails userEducationalDetails, Set<UserFamilyDetails> userFamilyDetails, UserImages userImages, UserMedicalDetails userMedicalDetails, UserPersonalDetails userPersonalDetails, UserProfessionalDetails userProfessionalDetails) {
-//        this.id = id;
-//        this.firstName = firstName;
-//        this.middleName = middleName;
-//        this.lastName = lastName;
-//        this.email = email;
-//        this.contact = contact;
-//        this.currentCity = currentCity;
-//        this.permanentCity = permanentCity;
-//        this.userEducationalDetails = userEducationalDetails;
-//        this.userFamilyDetails = userFamilyDetails;
-//        this.userImages = userImages;
-//        this.userMedicalDetails = userMedicalDetails;
-//        this.userPersonalDetails = userPersonalDetails;
-//        this.userProfessionalDetails = userProfessionalDetails;
-//    }
 
     public Long getId() {
         return id;
@@ -204,5 +188,13 @@ public class SafeUserDetails {
 
     public void setImageCount(int imageCount) {
         this.imageCount = imageCount;
+    }
+
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
     }
 }

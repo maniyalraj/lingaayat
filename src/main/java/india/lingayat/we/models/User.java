@@ -31,6 +31,8 @@ public class User {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private boolean isActive=true;
+
     @NotBlank
     @Size(max = 40)
     private String firstName;
@@ -138,6 +140,14 @@ public class User {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public String getUsername() {
