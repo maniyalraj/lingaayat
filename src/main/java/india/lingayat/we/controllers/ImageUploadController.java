@@ -22,6 +22,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import java.io.IOException;
 import java.net.URI;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
@@ -48,12 +49,13 @@ public class ImageUploadController {
         Cloudinary cloudinary = clouditonaryImageService.getCloudinary();
         Map uploadResult = null;
         String responseMessage = "";
+        String imageFoler = "profile";
 
         User user = userRepository.findByEmail(currentUser.getEmail());
 
         //            uploadResult = cloudinary.uploader().upload(file.getBytes(), ObjectUtils.emptyMap());
 
-        uploadResult = s3ImageUploadService.uploadImage(file, user, "profile");
+        uploadResult = s3ImageUploadService.uploadImage(file, user, imageFoler);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/api/upload/image")
                 .buildAndExpand("image").toUri();
@@ -63,14 +65,14 @@ public class ImageUploadController {
         {
 
             responseMessage += uploadResult.get("url").toString();
-            UserImages userImages = new UserImages(uploadResult.get("url").toString(), "profile", user);
+            UserImages userImages = new UserImages();
 
+            userImages.setImageUrl(uploadResult.get("url").toString());
+            userImages.setImageType(imageFoler);
+            userImages.setImageKey(uploadResult.get("bucketKey").toString());
             userImages.setUser(user);
             user.setUserImages(userImages);
             userRepository.save(user);
-
-
-
         }
 
         return ResponseEntity.created(location).body(new ApiResponse(true, responseMessage));
@@ -88,9 +90,9 @@ public class ImageUploadController {
     @PreAuthorize("hasRole('USER')")
     public ResponseEntity<?> uploadLibraryImage(@CurrentUser UserPrincipal currentUser, @RequestParam("file") MultipartFile file)  {
 
-        Cloudinary cloudinary = clouditonaryImageService.getCloudinary();
         Map uploadResult = null;
         String responseMessage = "";
+        String imageFolder = "library";
 
         User user = userRepository.findById(currentUser.getId()).orElse(null);
 
@@ -101,7 +103,7 @@ public class ImageUploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Cannot upload more than 4 images"));
         }
 
-        uploadResult = s3ImageUploadService.uploadImage(file, user, "library");
+        uploadResult = s3ImageUploadService.uploadImage(file, user, imageFolder);
         URI location = ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/api/upload/image")
                 .buildAndExpand("image").toUri();
@@ -111,8 +113,11 @@ public class ImageUploadController {
         {
 
             responseMessage += uploadResult.get("url").toString();
-            UserImages userImage = new UserImages(uploadResult.get("url").toString(), "library", user);
-
+            UserImages userImage = new UserImages();
+            userImage.setImageUrl(uploadResult.get("url").toString());
+            userImage.setImageType(imageFolder);
+            userImage.setImageKey(uploadResult.get("bucketKey").toString());
+            userImage.setUser(user);
             Set<UserImages> library =  user.getUserImageLibrary();
 
             if(library == null)
@@ -136,6 +141,46 @@ public class ImageUploadController {
         User user = userRepository.findById(currentUser.getId()).orElse(null);
 
         return user.getUserImageLibrary();
+    }
+
+    @PostMapping("/delete/libraryImage")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<?> deleteImage(@CurrentUser UserPrincipal currentUser, @RequestBody UserImages imageToDelete)
+    {
+        User user = userRepository.findById(currentUser.getId()).orElse(null);
+        URI location = ServletUriComponentsBuilder
+                .fromCurrentContextPath().path("/api/delete/libraryImage")
+                .buildAndExpand("image").toUri();
+
+        boolean canDelete = false;
+
+        Set<UserImages> imagesLibrary = user.getUserImageLibrary();
+        for(Iterator<UserImages> itr=imagesLibrary.iterator(); itr.hasNext();)
+        {
+            UserImages _image = itr.next();
+
+            if(_image.getId() == imageToDelete.getId())
+            {
+                imagesLibrary.remove(_image);
+                canDelete = true;
+                break;
+            }
+        }
+
+        if(canDelete) {
+
+            s3ImageUploadService.deleteImage(imageToDelete.getImageKey());
+
+            user.setUserImageLibrary(imagesLibrary);
+            userRepository.save(user);
+
+            return ResponseEntity.created(location).body(new ApiResponse(true, "Image Delete Succesful"));
+
+        }else{
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ApiResponse(false, "Not current user's Image"));
+
+        }
+
     }
 
 }

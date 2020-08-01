@@ -13,6 +13,8 @@ public class UserImages {
 
     private String imageUrl;
 
+    private String imageKey;
+
     private String imageType;
 
     @JsonIgnore
@@ -58,5 +60,13 @@ public class UserImages {
 
     public void setUser(User user) {
         this.user = user;
+    }
+
+    public String getImageKey() {
+        return imageKey;
+    }
+
+    public void setImageKey(String imageKey) {
+        this.imageKey = imageKey;
     }
 }

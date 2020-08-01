@@ -6,6 +6,7 @@ import com.amazonaws.regions.Regions;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CannedAccessControlList;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import india.lingayat.we.controllers.UserController;
@@ -30,13 +31,16 @@ public class S3ImageUploadService {
     @Value("${bucketName}")
     private String bucketName;
 
+    Regions clientRegion = Regions.AP_SOUTH_1;
+
 
     public Map<String, String> uploadImage(MultipartFile multipartFile, User user, String imageFolder)
     {
-        Regions clientRegion = Regions.AP_SOUTH_1;
+
         Map<String, String> uploadResult = new HashMap<>();
         uploadResult.put("url","");
         String bucketKey = user.getId()+"/"+imageFolder+"/"+user.getLastName()+user.getMiddleName()+ UUID.randomUUID().toString() +".jpeg";
+        uploadResult.put("bucketKey", bucketKey);
         File file = null;
 
         try{
@@ -69,5 +73,18 @@ public class S3ImageUploadService {
         }
 
         return uploadResult;
+    }
+
+    public boolean deleteImage(String imageKey)
+    {
+        AmazonS3 s3Client = AmazonS3ClientBuilder.standard()
+                .withRegion(clientRegion)
+                .build();
+
+        DeleteObjectRequest deleteObjectRequest = new DeleteObjectRequest(bucketName, imageKey);
+
+        s3Client.deleteObject(deleteObjectRequest);
+
+        return true;
     }
 }
